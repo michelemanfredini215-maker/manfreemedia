@@ -1,0 +1,2302 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>manfree_media — Automotive Photography</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@200;300;400;700;900&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import {
+    getFirestore, doc, getDoc, setDoc, onSnapshot
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey:            "AIzaSyAHiScfy0qdc9sTrDFRiGtR4a211ahB4jQ",
+    authDomain:        "manfreemedia-810e1.firebaseapp.com",
+    projectId:         "manfreemedia-810e1",
+    storageBucket:     "manfreemedia-810e1.firebasestorage.app",
+    messagingSenderId: "579347961055",
+    appId:             "1:579347961055:web:f2001c9ca50ac96b09c56a"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db  = getFirestore(app);
+  const DOC = doc(db, 'manfree_media', 'main');
+
+  // Espone al codice globale (non-module)
+  window._FB = { db, doc, getDoc, setDoc, onSnapshot, DOC };
+
+  // Carica DB da Firestore al boot, poi ascolta aggiornamenti real-time
+  window._fbReady = false;
+
+  async function boot() {
+    try {
+      const snap = await getDoc(DOC);
+      if (snap.exists()) {
+        const remote = snap.data();
+        // Merge: Firestore ha la precedenza su localStorage
+        window._mergeFB(remote);
+      }
+    } catch(e) {
+      console.warn('Firebase non raggiungibile, uso localStorage:', e);
+    }
+    window._fbReady = true;
+
+    // Real-time listener: aggiorna UI se admin su altro dispositivo modifica
+    onSnapshot(DOC, (snap) => {
+      if (!snap.exists()) return;
+      window._mergeFB(snap.data());
+    }, () => {});
+  }
+
+  window._fbBoot = boot;
+</script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080808;--bg2:#111111;--bg3:#181818;
+  --red:#c8102e;--red-dark:#a50d24;
+  --text:#efefef;--text2:#888;--text3:#3a3a3a;
+  --border:#1e1e1e;--border2:#2a2a2a;
+  --a-bg:#151820;--a-bg2:#1d2029;--a-bg3:#252a35;
+  --a-border:#2e3340;--a-text:#cdd0d6;--a-text2:#7a8190;--a-text3:#454c5a;
+  --a-blue:#4a8fd4;--a-green:#4caf6e;--a-red:#d95050;--a-orange:#e07a35;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+button{cursor:pointer;border:none;background:none;color:inherit;font-family:inherit}
+img{display:block;width:100%;height:100%;object-fit:cover}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border2)}
+
+/* ==================== GATE ==================== */
+#gate{
+  position:fixed;inset:0;z-index:9000;
+  background:var(--bg);display:flex;align-items:center;justify-content:center;
+}
+.gate-grid{
+  position:absolute;inset:0;
+  background-image:linear-gradient(rgba(255,255,255,.01) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(255,255,255,.01) 1px,transparent 1px);
+  background-size:60px 60px;
+}
+.gate-glow{
+  position:absolute;top:40%;left:50%;transform:translate(-50%,-50%);
+  width:600px;height:600px;pointer-events:none;
+  background:radial-gradient(circle,rgba(200,16,46,.09) 0%,transparent 65%);
+}
+.gate-card{
+  position:relative;z-index:2;width:100%;max-width:420px;padding:0 20px;
+}
+.gate-logo{
+  font-family:'Unbounded',sans-serif;font-weight:700;font-size:10px;
+  letter-spacing:4px;text-transform:uppercase;margin-bottom:44px;
+  display:flex;align-items:center;gap:10px;color:var(--text2);
+}
+.gate-logo b{color:var(--red)}
+.gate-logo::before{content:'';width:28px;height:1px;background:var(--red)}
+.gate-h1{
+  font-family:'Unbounded',sans-serif;font-weight:900;
+  font-size:clamp(26px,6vw,40px);text-transform:uppercase;
+  letter-spacing:-2px;line-height:.9;margin-bottom:10px;
+}
+.gate-sub{font-size:13px;color:var(--text2);line-height:1.8;margin-bottom:32px}
+.gate-tabs{
+  display:flex;border:1px solid var(--border2);margin-bottom:24px;overflow:hidden;
+}
+.gate-tab{
+  flex:1;padding:11px;text-align:center;font-size:10px;letter-spacing:2px;
+  text-transform:uppercase;font-family:'Unbounded',sans-serif;
+  color:var(--text3);cursor:pointer;transition:all .2s;
+}
+.gate-tab.on{background:var(--red);color:#fff}
+.gate-panel{display:none;flex-direction:column;gap:12px}
+.gate-panel.on{display:flex}
+.g-input{
+  background:var(--bg2);border:1px solid var(--border2);padding:13px 16px;
+  font-size:14px;color:var(--text);font-family:'DM Sans',sans-serif;
+  outline:none;width:100%;transition:border-color .2s;
+}
+.g-input:focus{border-color:var(--red)}
+.g-input::placeholder{color:var(--text3)}
+.g-btn{
+  font-family:'Unbounded',sans-serif;font-size:10px;letter-spacing:2.5px;
+  text-transform:uppercase;padding:14px;background:var(--red);
+  color:#fff;transition:background .2s;width:100%;
+}
+.g-btn:hover{background:var(--red-dark)}
+.g-err{font-size:12px;color:var(--a-red);display:none;padding:4px 0}
+.gate-admin{
+  margin-top:32px;padding-top:24px;border-top:1px solid var(--border);
+  display:flex;align-items:center;gap:8px;font-size:11px;
+  color:var(--text3);cursor:pointer;transition:color .2s;letter-spacing:.5px;
+}
+.gate-admin:hover{color:var(--text2)}
+.gate-admin svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2}
+
+/* ==================== HEADER ==================== */
+#hdr{
+  position:fixed;top:0;left:0;right:0;z-index:200;height:60px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 44px;background:rgba(8,8,8,.97);
+  border-bottom:1px solid var(--border);
+}
+.hdr-logo{font-family:'Unbounded',sans-serif;font-weight:700;font-size:11px;letter-spacing:3px;text-transform:uppercase}
+.hdr-logo b{color:var(--red)}
+.hdr-right{display:flex;align-items:center;gap:18px}
+.hdr-user{font-size:11px;color:var(--text2);display:flex;align-items:center;gap:7px}
+.hdr-user svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.5}
+.hdr-btn{
+  font-size:10px;letter-spacing:1.5px;text-transform:uppercase;
+  padding:7px 14px;border:1px solid var(--border2);color:var(--text2);
+  cursor:pointer;transition:all .2s;
+}
+.hdr-btn:hover{border-color:var(--text3);color:var(--text)}
+.hdr-btn.red{border-color:var(--red);color:var(--red)}
+.hdr-btn.red:hover{background:var(--red);color:#fff}
+
+/* ==================== HERO ==================== */
+#hero{
+  min-height:100vh;position:relative;overflow:hidden;
+  display:flex;align-items:flex-end;padding-top:60px;
+}
+.hero-grid{
+  position:absolute;inset:0;
+  background-image:linear-gradient(rgba(255,255,255,.013) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(255,255,255,.013) 1px,transparent 1px);
+  background-size:80px 80px;
+}
+.hero-vig{position:absolute;inset:0;background:linear-gradient(to top,rgba(8,8,8,1) 0%,rgba(8,8,8,.15) 50%,transparent 100%)}
+.hero-content{position:relative;z-index:2;padding:0 60px 80px;max-width:620px}
+.h-eye{
+  font-size:10px;letter-spacing:5px;text-transform:uppercase;color:var(--red);
+  margin-bottom:20px;display:flex;align-items:center;gap:12px;
+}
+.h-eye::before{content:'';width:32px;height:1px;background:var(--red)}
+.h-t1{font-family:'Unbounded',sans-serif;font-weight:900;font-size:clamp(36px,5.5vw,68px);text-transform:uppercase;letter-spacing:-2px;line-height:.9;display:block}
+.h-t2{font-family:'Unbounded',sans-serif;font-weight:200;font-size:clamp(24px,3.8vw,52px);text-transform:uppercase;letter-spacing:2px;font-style:italic;color:var(--text2);display:block;margin-top:6px}
+.h-brand{display:block;font-family:'Unbounded',sans-serif;font-size:clamp(10px,1.3vw,16px);color:var(--red);letter-spacing:7px;font-weight:400;margin-top:16px}
+.h-desc{font-size:14px;color:var(--text2);margin-top:22px;line-height:1.9;max-width:340px;font-weight:300}
+.h-cta{
+  display:inline-flex;align-items:center;gap:10px;margin-top:30px;
+  font-family:'Unbounded',sans-serif;font-size:10px;letter-spacing:2.5px;
+  text-transform:uppercase;padding:13px 28px;background:var(--red);color:#fff;
+  transition:background .2s;cursor:pointer;border:none;
+}
+.h-cta:hover{background:var(--red-dark)}
+.scroll-hint{
+  position:absolute;left:60px;bottom:80px;z-index:2;
+  writing-mode:vertical-rl;font-size:9px;letter-spacing:4px;
+  text-transform:uppercase;color:var(--text3);display:flex;align-items:center;gap:12px;
+}
+.scroll-hint::after{content:'';width:1px;height:56px;background:linear-gradient(to bottom,var(--red),transparent)}
+
+/* ==================== SECTION SHELL ==================== */
+.sec-hdr{padding:80px 60px 44px;display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:20px}
+.sec-eye{font-size:10px;letter-spacing:5px;text-transform:uppercase;color:var(--red);margin-bottom:10px;display:flex;align-items:center;gap:10px}
+.sec-eye::before{content:'';width:24px;height:1px;background:var(--red)}
+.sec-ttl{font-family:'Unbounded',sans-serif;font-weight:900;font-size:clamp(26px,4vw,48px);text-transform:uppercase;letter-spacing:-2px;line-height:.92}
+.sec-ttl .ghost{color:transparent;-webkit-text-stroke:1px var(--border2)}
+.sec-sub{font-size:13px;color:var(--text2);max-width:260px;line-height:1.85;font-weight:300}
+
+/* ==================== SHOOTING CARDS ==================== */
+#shoot-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;padding:0 3px}
+.s-card{position:relative;aspect-ratio:4/3;overflow:hidden;background:var(--bg2);cursor:pointer}
+.s-card img{width:100%;height:100%;object-fit:cover}
+.s-card:hover img{filter:brightness(.75)}
+.s-ov{
+  position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(8,8,8,.92) 0%,rgba(8,8,8,.15) 55%,transparent 100%);
+}
+.s-info{position:absolute;bottom:0;left:0;right:0;padding:18px 20px;z-index:2}
+.s-date{font-size:9px;letter-spacing:3px;color:var(--red);text-transform:uppercase;margin-bottom:5px}
+.s-name{font-family:'Unbounded',sans-serif;font-weight:700;font-size:13px;letter-spacing:-.5px;line-height:1.2;margin-bottom:4px}
+.s-cnt{font-size:11px;color:var(--text2)}
+.s-ph{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:var(--bg3)}
+.s-ph span{font-family:'Unbounded',sans-serif;font-size:8px;letter-spacing:3px;color:var(--text3);text-transform:uppercase}
+.s-empty{grid-column:1/-1;padding:72px;text-align:center;color:var(--text3);font-size:13px;line-height:2}
+.s-empty b{display:block;font-family:'Unbounded',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--border2);margin-bottom:8px}
+
+/* ==================== BOOK / PRENOTA ==================== */
+#book{padding:0 0 80px}
+.book-inner{padding:0 60px;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start}
+.book-left h3{font-family:'Unbounded',sans-serif;font-size:clamp(20px,3vw,32px);font-weight:900;letter-spacing:-1.5px;text-transform:uppercase;line-height:.95;margin-bottom:16px}
+.book-left p{font-size:13px;color:var(--text2);line-height:1.85;font-weight:300;margin-bottom:28px}
+.book-links{display:flex;flex-direction:column;gap:10px}
+.book-link{
+  display:flex;align-items:center;gap:12px;padding:14px 18px;
+  border:1px solid var(--border2);font-size:13px;color:var(--text2);
+  transition:all .2s;
+}
+.book-link:hover{border-color:var(--red);color:var(--text)}
+.book-link svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;flex-shrink:0}
+.book-right{background:var(--bg2);border:1px solid var(--border);padding:28px}
+.book-form-title{font-family:'Unbounded',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;margin-bottom:20px;color:var(--text2)}
+.bf-group{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.bf-label{font-size:11px;color:var(--text3);letter-spacing:.5px}
+.bf-input{
+  background:var(--bg3);border:1px solid var(--border2);padding:11px 14px;
+  font-size:13px;color:var(--text);font-family:'DM Sans',sans-serif;
+  outline:none;width:100%;transition:border-color .2s;
+}
+.bf-input:focus{border-color:var(--red)}
+.bf-input::placeholder{color:var(--text3)}
+textarea.bf-input{min-height:90px;resize:vertical}
+.bf-btn{
+  font-family:'Unbounded',sans-serif;font-size:10px;letter-spacing:2px;
+  text-transform:uppercase;padding:13px 24px;background:var(--red);
+  color:#fff;transition:background .2s;width:100%;margin-top:6px;
+}
+.bf-btn:hover{background:var(--red-dark)}
+.bf-ok{display:none;padding:16px;background:rgba(76,175,110,.08);border:1px solid rgba(76,175,110,.2);color:var(--a-green);font-size:13px;text-align:center;margin-top:12px}
+
+/* ==================== CONTACT ==================== */
+#contact{padding:80px 60px;border-top:1px solid var(--border)}
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start}
+.c-lbl{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--text3);margin-bottom:5px}
+.c-val{font-size:15px;margin-bottom:22px}
+
+/* ==================== FOOTER ==================== */
+#ftr{padding:24px 60px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.ftr-logo{font-family:'Unbounded',sans-serif;font-size:10px;letter-spacing:3px;font-weight:700}
+.ftr-logo b{color:var(--red)}
+.ftr-copy{font-size:11px;color:var(--text3)}
+
+/* ==================== LIGHTBOX ==================== */
+#lightbox{
+  display:none;position:fixed;inset:0;z-index:5000;
+  background:var(--bg);flex-direction:column;
+}
+#lightbox.on{display:flex}
+.lb-hdr{
+  height:60px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 44px;border-bottom:1px solid var(--border);flex-shrink:0;
+}
+.lb-back{display:flex;align-items:center;gap:8px;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--text2);cursor:pointer;transition:color .2s}
+.lb-back:hover{color:var(--text)}
+.lb-back svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2}
+.lb-ttl{font-family:'Unbounded',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase}
+.lb-meta{font-size:11px;color:var(--text2)}
+.lb-body{flex:1;overflow-y:auto;padding:28px 44px 44px}
+.lb-gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:4px}
+.lb-photo{aspect-ratio:4/3;overflow:hidden;background:var(--bg2);cursor:zoom-in;position:relative}
+.lb-photo img{width:100%;height:100%;object-fit:cover;transition:transform .4s}
+.lb-photo:hover img{transform:scale(1.05)}
+
+/* ==================== FULLSCREEN ==================== */
+#fv{
+  display:none;position:fixed;inset:0;z-index:6000;
+  background:rgba(0,0,0,.96);align-items:center;justify-content:center;
+}
+#fv.on{display:flex}
+#fv-img{max-width:90vw;max-height:88vh;object-fit:contain;width:auto;height:auto;display:block}
+.fv-x{position:absolute;top:20px;right:20px;width:42px;height:42px;background:rgba(255,255,255,.07);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .2s}
+.fv-x:hover{background:rgba(255,255,255,.14)}
+.fv-x svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2}
+.fv-arr{position:absolute;top:50%;transform:translateY(-50%);width:42px;height:42px;background:rgba(255,255,255,.07);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .2s}
+.fv-arr:hover{background:rgba(255,255,255,.14)}
+.fv-arr svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2}
+#fv-prev{left:20px}
+#fv-next{right:20px}
+
+/* ==================== ADMIN PANEL ==================== */
+#admin{display:none;position:fixed;inset:0;z-index:7000;background:var(--a-bg);flex-direction:column}
+#admin.on{display:flex}
+.a-top{
+  height:54px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;background:var(--a-bg2);border-bottom:1px solid var(--a-border);flex-shrink:0;
+}
+.a-top-logo{font-family:'Unbounded',sans-serif;font-size:10px;letter-spacing:3px;color:var(--a-text);font-weight:700}
+.a-top-logo b{color:var(--red)}
+.a-top-logo small{font-family:'DM Sans',sans-serif;font-size:9px;letter-spacing:2px;color:var(--a-text3);font-weight:300;margin-left:8px}
+.a-top-btns{display:flex;gap:8px}
+.a-tbtn{display:flex;align-items:center;gap:6px;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;padding:7px 13px;border:1px solid var(--a-border);color:var(--a-text2);transition:all .2s}
+.a-tbtn:hover{border-color:var(--a-text3);color:var(--a-text)}
+.a-tbtn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2}
+.a-body{display:flex;flex:1;overflow:hidden}
+
+/* Sidebar */
+.a-sidebar{width:210px;flex-shrink:0;background:var(--a-bg2);border-right:1px solid var(--a-border);overflow-y:auto;padding:18px 0}
+.a-nav-label{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--a-text3);padding:14px 18px 5px;font-weight:500}
+.a-nav-item{
+  display:flex;align-items:center;gap:9px;padding:9px 18px;
+  font-size:12px;color:var(--a-text2);cursor:pointer;
+  transition:all .2s;border-left:2px solid transparent;
+}
+.a-nav-item:hover{color:var(--a-text);background:rgba(255,255,255,.025)}
+.a-nav-item.on{color:var(--a-text);background:rgba(255,255,255,.04);border-left-color:var(--red)}
+.a-nav-item svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;flex-shrink:0}
+.a-badge{margin-left:auto;background:var(--red);color:#fff;padding:1px 6px;font-size:9px;border-radius:10px;min-width:18px;text-align:center}
+.a-badge.blue{background:var(--a-blue)}
+.a-badge.neutral{background:var(--a-bg3);color:var(--a-text2);border:1px solid var(--a-border)}
+
+/* Content */
+.a-content{flex:1;overflow-y:auto;padding:28px 32px}
+.a-tab{display:none}
+.a-tab.on{display:block}
+.a-pg-title{font-family:'Unbounded',sans-serif;font-size:18px;font-weight:700;letter-spacing:-1px;margin-bottom:5px}
+.a-pg-sub{font-size:12px;color:var(--a-text2);margin-bottom:24px;line-height:1.6}
+.a-divider{height:1px;background:var(--a-border);margin:20px 0}
+
+/* KPIs */
+.a-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+.a-kpi{background:var(--a-bg2);border:1px solid var(--a-border);padding:18px;border-radius:2px}
+.a-kpi-n{font-family:'Unbounded',sans-serif;font-size:24px;font-weight:700;color:var(--a-text)}
+.a-kpi-l{font-size:10px;color:var(--a-text3);margin-top:3px;letter-spacing:.5px}
+
+/* Buttons */
+.ab{
+  display:inline-flex;align-items:center;gap:6px;padding:8px 16px;
+  border:1px solid var(--a-border);font-size:11px;color:var(--a-text2);
+  transition:all .2s;cursor:pointer;
+}
+.ab:hover{color:var(--a-text);border-color:var(--a-text3)}
+.ab.primary{background:var(--red);border-color:var(--red);color:#fff}
+.ab.primary:hover{background:var(--red-dark);border-color:var(--red-dark)}
+.ab.danger{border-color:var(--a-red);color:var(--a-red)}
+.ab.danger:hover{background:var(--a-red);color:#fff;border-color:var(--a-red)}
+.ab.warn{border-color:var(--a-orange);color:var(--a-orange)}
+.ab.warn:hover{background:var(--a-orange);color:#fff}
+.ab svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2}
+.ab-row{display:flex;gap:8px;flex-wrap:wrap}
+
+/* Form */
+.a-fg{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.a-lbl{font-size:11px;color:var(--a-text2);letter-spacing:.3px}
+.a-inp{
+  background:var(--a-bg);border:1px solid var(--a-border);
+  padding:9px 13px;font-size:13px;color:var(--a-text);
+  font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s;width:100%;
+}
+.a-inp:focus{border-color:var(--a-blue)}
+textarea.a-inp{min-height:72px;resize:vertical}
+
+/* Upload zone */
+.a-drop{
+  border:1px dashed var(--a-border);padding:36px;text-align:center;
+  cursor:pointer;transition:border-color .2s,background .2s;
+}
+.a-drop:hover,.a-drop.drag{border-color:var(--red);background:rgba(200,16,46,.04)}
+.a-drop input{display:none}
+.a-drop-icon svg{width:36px;height:36px;stroke:var(--a-text3);fill:none;stroke-width:1.3;margin:0 auto 12px}
+.a-drop-txt{font-size:13px;color:var(--a-text);margin-bottom:3px}
+.a-drop-sub{font-size:11px;color:var(--a-text3)}
+
+/* Table */
+.a-tbl-wrap{overflow-x:auto;border:1px solid var(--a-border)}
+.a-tbl{width:100%;border-collapse:collapse;font-size:12px}
+.a-tbl th{text-align:left;padding:9px 13px;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--a-text3);background:var(--a-bg2);border-bottom:1px solid var(--a-border);font-weight:500}
+.a-tbl td{padding:11px 13px;border-bottom:1px solid rgba(255,255,255,.035);color:var(--a-text2);vertical-align:middle}
+.a-tbl tr:last-child td{border-bottom:none}
+.a-tbl tr:hover td{background:rgba(255,255,255,.018)}
+.a-tbl-empty{color:var(--a-text3)!important;text-align:center;padding:28px!important;font-style:italic}
+.a-thumb-sm{width:52px;height:38px;object-fit:cover;display:block;background:var(--a-bg3)}
+
+/* Shooting list in admin */
+.a-sl{display:flex;flex-direction:column;gap:8px}
+.a-sl-item{background:var(--a-bg2);border:1px solid var(--a-border);padding:14px 18px;display:flex;align-items:center;gap:14px}
+.a-sl-thumb{width:68px;height:48px;object-fit:cover;flex-shrink:0;background:var(--a-bg3);display:flex;align-items:center;justify-content:center}
+.a-sl-thumb img{width:68px;height:48px;object-fit:cover}
+.a-sl-thumb-ph{width:68px;height:48px;display:flex;align-items:center;justify-content:center;background:var(--a-bg3);font-size:8px;letter-spacing:1px;color:var(--a-text3);text-transform:uppercase;flex-shrink:0}
+.a-sl-info{flex:1;min-width:0}
+.a-sl-name{font-size:13px;color:var(--a-text);font-weight:500;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.a-sl-meta{font-size:10px;color:var(--a-text3);letter-spacing:.3px}
+.a-sl-btns{display:flex;gap:6px;align-items:center;flex-shrink:0}
+
+/* Photo editor within admin */
+.a-shoot-editor{display:none;margin-top:20px;border:1px solid var(--a-border);background:var(--a-bg2)}
+.a-shoot-editor.on{display:block}
+.a-se-hdr{padding:12px 18px;border-bottom:1px solid var(--a-border);display:flex;align-items:center;justify-content:space-between}
+.a-se-title{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--a-text)}
+.a-se-body{padding:14px}
+.a-se-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:5px}
+.a-se-photo{position:relative;aspect-ratio:4/3;background:var(--a-bg3);overflow:hidden}
+.a-se-photo img{width:100%;height:100%;object-fit:cover}
+.a-se-del{
+  position:absolute;top:4px;right:4px;width:22px;height:22px;
+  background:rgba(217,80,80,.9);border:none;color:#fff;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:15px;line-height:1;
+  transition:background .2s;
+}
+.a-se-del:hover{background:var(--a-red)}
+
+/* Texts */
+.a-txt-sec{margin-bottom:22px;border:1px solid var(--a-border)}
+.a-txt-sec-hdr{padding:10px 16px;background:var(--a-bg2);border-bottom:1px solid var(--a-border);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--a-text2)}
+.a-txt-sec-body{padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.a-txt-row{display:flex;align-items:flex-start;gap:10px}
+.a-txt-lbl{font-size:11px;color:var(--a-text3);width:140px;flex-shrink:0;padding-top:9px}
+.a-txt-rhs{flex:1;display:flex;gap:7px;align-items:flex-start}
+
+/* Access log */
+.a-log{display:flex;flex-direction:column;gap:2px}
+.a-log-item{display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--a-bg2);border:1px solid var(--a-border);font-size:12px}
+.a-log-badge{width:64px;font-size:8px;letter-spacing:2px;text-transform:uppercase;padding:3px 7px;text-align:center;flex-shrink:0}
+.a-log-badge.guest{background:rgba(74,143,212,.1);color:var(--a-blue);border:1px solid rgba(74,143,212,.2)}
+.a-log-badge.email{background:rgba(76,175,110,.1);color:var(--a-green);border:1px solid rgba(76,175,110,.2)}
+.a-log-val{flex:1;color:var(--a-text)}
+.a-log-time{font-size:10px;color:var(--a-text3)}
+
+/* Booking requests */
+.a-req{display:flex;flex-direction:column;gap:6px}
+.a-req-item{background:var(--a-bg2);border:1px solid var(--a-border);padding:14px 18px}
+.a-req-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.a-req-name{font-size:13px;color:var(--a-text);font-weight:500}
+.a-req-time{font-size:10px;color:var(--a-text3)}
+.a-req-meta{font-size:11px;color:var(--a-text2);margin-bottom:6px}
+.a-req-msg{font-size:12px;color:var(--a-text2);line-height:1.6;background:var(--a-bg);padding:10px;border-left:2px solid var(--a-border)}
+
+/* Modal */
+#modal{display:none;position:fixed;inset:0;z-index:8000;background:rgba(0,0,0,.82);align-items:center;justify-content:center}
+#modal.on{display:flex}
+.modal-box{background:var(--a-bg2);border:1px solid var(--a-border);padding:28px;width:100%;max-width:380px}
+.modal-title{font-family:'Unbounded',sans-serif;font-size:13px;font-weight:700;letter-spacing:-.5px;margin-bottom:5px}
+.modal-sub{font-size:12px;color:var(--a-text2);margin-bottom:20px}
+.modal-err{font-size:12px;color:var(--a-red);display:none;margin-top:8px}
+
+/* Edit shooting modal */
+#edit-modal{display:none;position:fixed;inset:0;z-index:8000;background:rgba(0,0,0,.82);align-items:center;justify-content:center}
+#edit-modal.on{display:flex}
+.edit-box{background:var(--a-bg2);border:1px solid var(--a-border);padding:28px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto}
+
+/* Toast */
+#toast{
+  position:fixed;bottom:24px;right:24px;z-index:9999;
+  background:#fff;color:#111;padding:11px 18px;font-size:12px;font-weight:500;
+  transform:translateY(70px);opacity:0;transition:all .3s;pointer-events:none;
+  letter-spacing:.3px;
+}
+#toast.show{transform:translateY(0);opacity:1}
+#toast.err{background:var(--red);color:#fff}
+#toast.ok{background:#1a2e1e;border:1px solid var(--a-green);color:var(--a-green)}
+
+
+/* ==================== CONFIRM DIALOG ==================== */
+#confirm-overlay{
+  display:none;position:fixed;inset:0;z-index:19000;
+  background:rgba(0,0,0,.75);align-items:center;justify-content:center;
+}
+#confirm-overlay.on{display:flex}
+.confirm-box{
+  background:#1a1a1a;border:1px solid #2a2a2a;padding:28px 32px;
+  max-width:380px;width:90%;font-family:'DM Sans',sans-serif;
+}
+.confirm-msg{font-size:14px;color:#efefef;line-height:1.7;margin-bottom:22px}
+.confirm-btns{display:flex;gap:10px;justify-content:flex-end}
+.confirm-ok{
+  font-family:'Unbounded',sans-serif;font-size:10px;letter-spacing:2px;
+  text-transform:uppercase;padding:10px 20px;background:#c8102e;
+  color:#fff;border:none;cursor:pointer;transition:background .2s;
+}
+.confirm-ok:hover{background:#a50d24}
+.confirm-cancel{
+  font-family:'Unbounded',sans-serif;font-size:10px;letter-spacing:2px;
+  text-transform:uppercase;padding:10px 20px;background:none;
+  color:#888;border:1px solid #2a2a2a;cursor:pointer;transition:all .2s;
+}
+.confirm-cancel:hover{border-color:#444;color:#efefef}
+
+/* ==================== MOBILE ==================== */
+@media(max-width:900px){
+  #hdr{padding:0 16px}
+  .hdr-user{display:none}
+  .hdr-btn{padding:6px 10px;font-size:9px}
+  .hero-content{padding:0 24px 64px}
+  .sec-hdr{padding:60px 24px 32px}
+  #shoot-grid{grid-template-columns:1fr 1fr}
+  .book-inner{grid-template-columns:1fr;padding:0 24px}
+  #contact{padding:60px 24px}
+  #ftr{padding:18px 24px}
+  .lb-hdr{padding:0 20px}
+  .lb-body{padding:16px 20px 32px}
+  .a-kpis{grid-template-columns:1fr 1fr}
+  .a-sidebar{
+    position:fixed;bottom:0;left:0;right:0;width:100%;z-index:100;
+    background:var(--a-bg2);border-top:1px solid var(--a-border);
+    border-right:none;overflow-x:auto;overflow-y:hidden;
+    padding:0;display:flex;flex-direction:row;align-items:stretch;
+    height:50px;
+  }
+  .a-nav-label{display:none}
+  .a-nav-item{
+    flex:1;flex-direction:column;gap:2px;padding:5px 6px;
+    font-size:8px;letter-spacing:.3px;justify-content:center;
+    border-left:none;border-top:2px solid transparent;min-width:52px;text-align:center;
+  }
+  .a-nav-item.on{border-top-color:var(--red);border-left-color:transparent}
+  .a-nav-item svg{width:15px;height:15px;margin:0 auto}
+  .a-badge{display:none}
+  .a-body{flex-direction:column}
+  .a-content{padding:20px 16px 70px}
+  .a-top{padding:0 14px}
+  .a-tbtn{padding:6px 10px;font-size:9px}
+}
+@media(max-width:600px){
+  /* GATE */
+  .gate-card{padding:0 20px}
+  .gate-h1{font-size:32px}
+  .gate-sub{font-size:12px}
+  .gate-tab{font-size:9px;padding:10px 6px}
+
+  /* HEADER */
+  #hdr{padding:0 14px;height:52px}
+  .hdr-logo{font-size:9px;letter-spacing:2px}
+  .hdr-right{gap:8px}
+  .hdr-btn{padding:5px 8px;font-size:8px;letter-spacing:1px}
+
+  /* HERO */
+  #hero{min-height:100svh}
+  .hero-content{padding:0 20px 56px;max-width:100%}
+  .h-eye{font-size:9px;letter-spacing:3px}
+  .h-desc{font-size:13px;max-width:100%}
+  .h-cta{font-size:9px;padding:12px 22px}
+  .scroll-hint{display:none}
+
+  /* SEZIONI */
+  .sec-hdr{padding:48px 20px 24px;flex-direction:column;align-items:flex-start;gap:12px}
+  .sec-ttl{font-size:28px}
+  .sec-sub{max-width:100%}
+
+  /* GRIGLIA SHOOTING */
+  #shoot-grid{grid-template-columns:1fr}
+
+  /* BOOK */
+  .book-inner{padding:0 20px;gap:32px}
+  .book-left h3{font-size:22px}
+  .book-link{font-size:12px;padding:12px 14px}
+
+  /* CONTACT */
+  #contact{padding:48px 20px}
+  .contact-grid{grid-template-columns:1fr;gap:8px}
+  .c-val{font-size:13px}
+
+  /* FOOTER */
+  #ftr{padding:16px 20px;flex-direction:column;align-items:flex-start;gap:6px}
+
+  /* LIGHTBOX */
+  .lb-hdr{height:52px;padding:0 16px}
+  .lb-back{font-size:10px}
+  .lb-ttl{font-size:10px}
+  .lb-meta{display:none}
+  .lb-body{padding:12px 12px 24px}
+  .lb-gal{grid-template-columns:1fr 1fr;gap:3px}
+
+  /* FULLSCREEN */
+  #fv-img{max-width:100vw;max-height:80vh}
+  .fv-arr{width:36px;height:36px}
+  .fv-x{width:36px;height:36px;top:12px;right:12px}
+
+  /* ADMIN */
+  .a-kpis{grid-template-columns:1fr 1fr}
+  .a-pg-title{font-size:15px}
+  .a-top-btns{gap:5px}
+  .a-tbtn svg{display:none}
+  .a-sl-item{flex-wrap:wrap;gap:8px}
+  .a-sl-btns{width:100%;display:flex;gap:6px}
+  .a-sl-btns .ab{flex:1;justify-content:center}
+  .a-req-item{padding:14px}
+  .a-req-hdr{flex-direction:column;align-items:flex-start;gap:8px}
+  .ab-row{gap:6px}
+  .ab-row .ab{flex:1;justify-content:center;font-size:9px;padding:8px 6px}
+  .a-drop{padding:24px}
+
+  /* MODALI */
+  .modal-box{padding:20px;margin:16px}
+  .edit-box{padding:20px;margin:16px;max-height:95vh}
+  .confirm-box{padding:20px 22px;margin:16px}
+  .confirm-btns{flex-direction:column-reverse}
+  .confirm-ok,.confirm-cancel{width:100%;text-align:center}
+
+  /* TOAST */
+  #toast{bottom:60px;left:12px;right:12px;text-align:center}
+}
+</style>
+</head>
+<body>
+
+<!-- ================================================================
+     GATE
+     ================================================================ -->
+<div id="gate">
+  <div class="gate-grid"></div>
+  <div class="gate-glow"></div>
+  <div class="gate-card">
+    <div class="gate-logo"><b>manfree</b>_media</div>
+    <div class="gate-h1" id="gtxt-h1">Portfolio<br>Esclusivo.</div>
+    <div class="gate-sub" id="gtxt-sub">Inserisci i tuoi dati per accedere alla galleria privata di manfree_media.</div>
+    <div class="gate-tabs">
+      <div class="gate-tab on" id="gtab-ospite" onclick="gTab('ospite')">Accesso Ospite</div>
+      <div class="gate-tab" id="gtab-email" onclick="gTab('email')">Accesso Email</div>
+    </div>
+    <!-- Ospite -->
+    <div class="gate-panel on" id="gpanel-ospite">
+      <input class="g-input" id="g-nome" placeholder="Nome" autocomplete="given-name">
+      <input class="g-input" id="g-cognome" placeholder="Cognome" autocomplete="family-name">
+      <div class="g-err" id="gerr-ospite">Inserisci nome e cognome per continuare.</div>
+      <button class="g-btn" onclick="gAccessOspite()">Entra nel Portfolio →</button>
+    </div>
+    <!-- Email -->
+    <div class="gate-panel" id="gpanel-email">
+      <input class="g-input" id="g-email" type="email" placeholder="La tua email" autocomplete="email">
+      <div class="g-err" id="gerr-email">Inserisci un indirizzo email valido.</div>
+      <button class="g-btn" onclick="gAccessEmail()">Entra nel Portfolio →</button>
+    </div>
+    <div class="gate-admin" onclick="openAdminLogin()">
+      <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      Pannello Amministratore
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================
+     MAIN SITE
+     ================================================================ -->
+<div id="site" style="display:none">
+
+  <!-- HEADER -->
+  <div id="hdr">
+    <div class="hdr-logo"><b>manfree</b>_media</div>
+    <div class="hdr-right">
+      <div class="hdr-user">
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span id="hdr-uname"></span>
+      </div>
+      <button class="hdr-btn" onclick="gotoBook()">Prenota</button>
+      <button class="hdr-btn" onclick="doLogout()">Esci</button>
+      <button class="hdr-btn red" onclick="openAdminLogin()">Admin</button>
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <section id="hero">
+    <div class="hero-grid"></div>
+    <div class="hero-vig"></div>
+    <div class="hero-content">
+      <div class="h-eye" id="txt-eye">Automotive Photography</div>
+      <h1><span class="h-t1" id="txt-t1">Shoot.</span><span class="h-t2" id="txt-t2">Feel the machine.</span><span class="h-brand" id="txt-brand">manfree_media</span></h1>
+      <p class="h-desc" id="txt-desc">Fotografia automobilistica. Ogni scatto racconta la velocità, il design, l'emozione.</p>
+      <button class="h-cta" onclick="gotoShoot()">Esplora il Portfolio →</button>
+    </div>
+  </section>
+
+  <!-- SHOOTING SECTION -->
+  <section id="shootings">
+    <div class="sec-hdr">
+      <div>
+        <div class="sec-eye" id="txt-port-eye">Portfolio</div>
+        <div class="sec-ttl">Shooting<br><span class="ghost" id="txt-port-ghost">& Eventi</span></div>
+      </div>
+      <div class="sec-sub" id="txt-port-sub">Ogni progetto è una cartella dedicata. Clicca su uno shooting per esplorare tutte le foto.</div>
+    </div>
+    <div id="shoot-grid">
+      <div class="s-empty"><b>Nessuno shooting ancora</b>Entra nell'admin per creare il primo shooting.</div>
+    </div>
+  </section>
+
+  <!-- BOOK / PRENOTA -->
+  <section id="book">
+    <div class="sec-hdr" style="padding-bottom:32px">
+      <div>
+        <div class="sec-eye" id="txt-book-eye">Collaborazioni</div>
+        <div class="sec-ttl">Book<br><span class="ghost">a Shoot</span></div>
+      </div>
+      <div class="sec-sub" id="txt-book-sub">Hai un'auto che merita di essere immortalata? Parliamoci.</div>
+    </div>
+    <div class="book-inner">
+      <div class="book-left">
+        <h3 id="txt-book-h3">Prenota uno shooting privato.</h3>
+        <p id="txt-book-p">Lavoro con privati e brand del settore automotive. Contattami direttamente o compila il form — rispondo entro 24 ore.</p>
+        <div class="book-links">
+          <a class="book-link" href="mailto:michelegiochi215@gmail.com">
+            <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            michelegiochi215@gmail.com
+          </a>
+          <a class="book-link" href="https://instagram.com/manfree_media" target="_blank">
+            <svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+            @manfree_media su Instagram
+          </a>
+        </div>
+      </div>
+      <div class="book-right">
+        <div class="book-form-title">Inviami una richiesta</div>
+        <div class="bf-group">
+          <label class="bf-label">Nome e Cognome *</label>
+          <input class="bf-input" id="bk-name" placeholder="Mario Rossi">
+        </div>
+        <div class="bf-group">
+          <label class="bf-label">Email *</label>
+          <input class="bf-input" id="bk-email" type="email" placeholder="mario@esempio.it">
+        </div>
+        <div class="bf-group">
+          <label class="bf-label">Auto / Progetto</label>
+          <input class="bf-input" id="bk-car" placeholder="Ferrari 488, evento, ecc.">
+        </div>
+        <div class="bf-group">
+          <label class="bf-label">Messaggio *</label>
+          <textarea class="bf-input" id="bk-msg" placeholder="Descrivimi il tuo progetto..."></textarea>
+        </div>
+        <button class="bf-btn" onclick="submitBooking()">Invia Richiesta →</button>
+        <div class="bf-ok" id="bk-ok">Richiesta inviata. Ti risponderò entro 24 ore.</div>
+        <div style="margin-top:18px;text-align:center">
+          <div style="font-size:11px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">oppure contattami direttamente</div>
+          <a href="https://www.instagram.com/manfree_media/" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:12px;padding:16px 24px;background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);color:#fff;font-family:'Unbounded',sans-serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:opacity .2s;width:100%" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+            <svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:none;stroke:white;stroke-width:1.8;flex-shrink:0"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+            Scrivimi su Instagram @manfree_media
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <div class="sec-eye" style="margin-bottom:18px" id="txt-c-eye">Contatti</div>
+    <div class="contact-grid">
+      <div>
+        <div class="c-lbl">Email</div>
+        <div class="c-val" id="txt-c-email">michelegiochi215@gmail.com</div>
+        <div class="c-lbl">Instagram</div>
+        <div class="c-val" id="txt-c-ig">@manfree_media</div>
+        <div class="c-lbl">Città</div>
+        <div class="c-val" id="txt-c-city">Milano, Italia</div>
+      </div>
+      <div>
+        <p style="font-size:14px;color:var(--text2);line-height:1.9;font-weight:300" id="txt-c-sub">Per collaborazioni, shooting privati o qualsiasi richiesta, scrivimi direttamente. Rispondo entro 24 ore.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer id="ftr">
+    <div class="ftr-logo"><b>manfree</b>_media</div>
+    <div class="ftr-copy" id="txt-ftr">© 2025 manfree_media. Tutti i diritti riservati.</div>
+  </footer>
+</div><!-- /site -->
+
+<!-- ================================================================
+     LIGHTBOX
+     ================================================================ -->
+<div id="lightbox">
+  <div class="lb-hdr">
+    <div class="lb-back" onclick="closeLightbox()">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      Tutti gli Shooting
+    </div>
+    <div class="lb-ttl" id="lb-title"></div>
+    <div class="lb-meta" id="lb-meta"></div>
+  </div>
+  <div class="lb-body">
+    <div id="lb-gallery" class="lb-gal"></div>
+    <div id="lb-empty" style="display:none;padding:60px;text-align:center;color:var(--text3);font-size:13px">Nessuna foto in questo shooting.</div>
+  </div>
+</div>
+
+<!-- ================================================================
+     FULLSCREEN VIEWER
+     ================================================================ -->
+<div id="fv">
+  <img id="fv-img" src="" alt="">
+  <div class="fv-x" onclick="closeFV()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+  <div class="fv-arr" id="fv-prev" onclick="fvNav(-1)"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
+  <div class="fv-arr" id="fv-next" onclick="fvNav(1)"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+</div>
+
+<!-- ================================================================
+     ADMIN LOGIN MODAL
+     ================================================================ -->
+<div id="modal">
+  <div class="modal-box">
+    <div class="modal-title">Accesso Admin</div>
+    <div class="modal-sub">Inserisci la password per accedere al pannello di controllo.</div>
+    <div class="a-fg">
+      <label class="a-lbl">Password</label>
+      <input class="a-inp" id="mpw" type="password" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
+    </div>
+    <div class="modal-err" id="m-err">Password errata.</div>
+    <div class="ab-row" style="margin-top:14px" id="modal-btns">
+      <button class="ab primary" onclick="checkPw()">Accedi</button>
+      <button class="ab" onclick="closeModal()">Annulla</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================
+     EDIT SHOOTING MODAL
+     ================================================================ -->
+<div id="edit-modal">
+  <div class="edit-box">
+    <div class="modal-title" style="margin-bottom:5px">Modifica Shooting</div>
+    <div class="modal-sub">Modifica i dettagli dello shooting. Premi Salva per confermare.</div>
+    <input type="hidden" id="em-id">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="a-fg" style="grid-column:1/-1">
+        <label class="a-lbl">Titolo *</label>
+        <input class="a-inp" id="em-title" placeholder="Titolo shooting">
+      </div>
+      <div class="a-fg">
+        <label class="a-lbl">Data</label>
+        <input class="a-inp" id="em-date" type="date">
+      </div>
+      <div class="a-fg">
+        <label class="a-lbl">Location</label>
+        <input class="a-inp" id="em-loc" placeholder="Milano, Italia">
+      </div>
+      <div class="a-fg" style="grid-column:1/-1">
+        <label class="a-lbl">Descrizione</label>
+        <textarea class="a-inp" id="em-desc" style="min-height:60px"></textarea>
+      </div>
+    </div>
+    <div class="a-fg">
+      <label class="a-lbl">Nuova Copertina (opzionale)</label>
+      <div class="a-drop" onclick="document.getElementById('em-cover-inp').click()" style="padding:20px">
+        <input type="file" id="em-cover-inp" accept="image/*" onchange="handleEditCover(this)">
+        <div class="a-drop-txt" id="em-cover-txt">Clicca per cambiare la copertina</div>
+        <div class="a-drop-sub">Lascia vuoto per mantenere quella attuale</div>
+      </div>
+    </div>
+    <div class="ab-row" style="margin-top:6px">
+      <button class="ab primary" onclick="saveShooting()">Salva Modifiche</button>
+      <button class="ab" onclick="closeEditModal()">Annulla</button>
+    </div>
+    <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--a-border)">
+      <button class="ab danger" style="width:100%" onclick="deleteFromEditModal()">Elimina questo shooting</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================
+     ADMIN PANEL
+     ================================================================ -->
+<div id="admin">
+  <div class="a-top">
+    <div class="a-top-logo"><b>manfree</b>_media <small>Admin Panel</small> <small id="fb-status" style="margin-left:14px;font-size:8px;letter-spacing:1px;color:var(--a-text3)">● Firebase…</small></div>
+    <div class="a-top-btns">
+      <button class="a-tbtn" onclick="closeAdmin()">
+        <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        Anteprima
+      </button>
+      <button class="a-tbtn" onclick="exitAdmin()">
+        <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Esci Admin
+      </button>
+    </div>
+  </div>
+
+  <div class="a-body">
+    <!-- SIDEBAR -->
+    <div class="a-sidebar">
+      <div class="a-nav-label">Panoramica</div>
+      <div class="a-nav-item on" onclick="aTab('dash')">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </div>
+      <div class="a-nav-label">Shooting</div>
+      <div class="a-nav-item" onclick="aTab('new-shoot')">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nuovo Shooting
+      </div>
+      <div class="a-nav-item" onclick="aTab('manage-shoot')">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        Gestisci Shooting
+        <span class="a-badge neutral" id="bdg-shoots">0</span>
+      </div>
+      <div class="a-nav-label">Sito</div>
+      <div class="a-nav-item" onclick="aTab('texts')">
+        <svg viewBox="0 0 24 24"><line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg>
+        Gestione Testi
+      </div>
+      <div class="a-nav-label">Richieste</div>
+      <div class="a-nav-item" onclick="aTab('bookings')">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Richieste Ricevute
+        <span class="a-badge" id="bdg-book">0</span>
+      </div>
+      <div class="a-nav-label">Accessi</div>
+      <div class="a-nav-item" onclick="aTab('access')">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Registro Accessi
+        <span class="a-badge blue" id="bdg-access">0</span>
+      </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="a-content">
+
+      <!-- DASHBOARD -->
+      <div class="a-tab on" id="atab-dash">
+        <div class="a-pg-title">Dashboard</div>
+        <div class="a-pg-sub">Panoramica del portfolio manfree_media.</div>
+        <div class="a-kpis">
+          <div class="a-kpi"><div class="a-kpi-n" id="kpi-shoots">0</div><div class="a-kpi-l">Shooting</div></div>
+          <div class="a-kpi"><div class="a-kpi-n" id="kpi-photos">0</div><div class="a-kpi-l">Foto totali</div></div>
+          <div class="a-kpi"><div class="a-kpi-n" id="kpi-book">0</div><div class="a-kpi-l">Richieste</div></div>
+          <div class="a-kpi"><div class="a-kpi-n" id="kpi-access">0</div><div class="a-kpi-l">Accessi</div></div>
+        </div>
+        <div class="a-divider"></div>
+        <div class="ab-row">
+          <button class="ab primary" onclick="aTab('new-shoot')">+ Nuovo Shooting</button>
+          <button class="ab" onclick="aTab('bookings')">Vedi Richieste</button>
+          <button class="ab" onclick="aTab('access')">Registro Accessi</button>
+          <button class="ab" onclick="aTab('texts')">Modifica Testi</button>
+        </div>
+        <div class="a-divider"></div>
+        <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--a-text3);margin-bottom:10px">Backup dati</div>
+        <div class="ab-row">
+          <button class="ab" onclick="exportDB()">Esporta backup (.json)</button>
+          <button class="ab warn" onclick="document.getElementById('import-inp').click()">Importa backup</button>
+          <input type="file" id="import-inp" accept=".json" style="display:none" onchange="importDB(this)">
+        </div>
+        <div style="margin-top:8px;font-size:11px;color:var(--a-text3);line-height:1.7">
+          Esporta regolarmente un backup per non perdere shooting, foto e richieste se cambi browser o dispositivo.
+          L'importazione sovrascrive tutti i dati attuali.
+        </div>
+        <div class="a-divider"></div>
+        <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--a-text3);margin-bottom:10px">Sicurezza</div>
+        <div style="max-width:400px">
+          <div class="a-fg">
+            <label class="a-lbl">Nuova password admin</label>
+            <input class="a-inp" id="new-pw" type="password" placeholder="Nuova password">
+          </div>
+          <div class="a-fg">
+            <label class="a-lbl">Conferma password</label>
+            <input class="a-inp" id="new-pw2" type="password" placeholder="Ripeti la password">
+          </div>
+          <button class="ab primary" style="padding:9px 18px" onclick="changeAdminPw()">Aggiorna password</button>
+          <div id="pw-msg" style="display:none;margin-top:8px;font-size:12px;line-height:1.6"></div>
+        </div>
+      </div>
+
+      <!-- NUOVO SHOOTING -->
+      <div class="a-tab" id="atab-new-shoot">
+        <div class="a-pg-title">Nuovo Shooting</div>
+        <div class="a-pg-sub">Crea una nuova scheda evento. Le foto si aggiungono dopo dalla sezione "Gestisci Shooting".</div>
+        <div style="max-width:560px">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div class="a-fg" style="grid-column:1/-1">
+              <label class="a-lbl">Titolo *</label>
+              <input class="a-inp" id="ns-title" placeholder="Evento Ferrari Roma 2025">
+            </div>
+            <div class="a-fg">
+              <label class="a-lbl">Data</label>
+              <input class="a-inp" id="ns-date" type="date">
+            </div>
+            <div class="a-fg">
+              <label class="a-lbl">Location</label>
+              <input class="a-inp" id="ns-loc" placeholder="Milano, Italia">
+            </div>
+            <div class="a-fg" style="grid-column:1/-1">
+              <label class="a-lbl">Descrizione breve</label>
+              <textarea class="a-inp" id="ns-desc" placeholder="Descrizione dello shooting..." style="min-height:65px"></textarea>
+            </div>
+          </div>
+          <div class="a-fg">
+            <label class="a-lbl">Foto copertina</label>
+            <div class="a-drop" id="ns-drop" onclick="document.getElementById('ns-cover').click()">
+              <input type="file" id="ns-cover" accept="image/*" onchange="handleNsCover(this)">
+              <div class="a-drop-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
+              <div class="a-drop-txt" id="ns-cover-txt">Clicca per scegliere la copertina</div>
+              <div class="a-drop-sub">Immagine principale della scheda</div>
+            </div>
+            <div id="ns-preview" style="display:none;margin-top:8px">
+              <img id="ns-preview-img" style="width:180px;height:120px;object-fit:cover;display:block">
+            </div>
+          </div>
+          <button class="ab primary" onclick="createShooting()">
+            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Crea Shooting
+          </button>
+        </div>
+      </div>
+
+      <!-- GESTISCI SHOOTING -->
+      <div class="a-tab" id="atab-manage-shoot">
+        <div class="a-pg-title">Gestisci Shooting</div>
+        <div class="a-pg-sub">Elenco di tutti gli shooting. Usa ELIMINA per rimuoverli istantaneamente dal sito. Usa MODIFICA per aggiornare titolo, data e copertina.</div>
+        <div id="a-shoot-list" class="a-sl"></div>
+        <div id="a-shoot-empty" style="display:none;padding:36px;text-align:center;color:var(--a-text3);font-size:13px">Nessuno shooting. Crea il primo dalla sezione "Nuovo Shooting".</div>
+        <!-- Inline photo editor -->
+        <div class="a-shoot-editor" id="a-shoot-editor">
+          <div class="a-se-hdr">
+            <div class="a-se-title" id="ase-title">Gestione Foto</div>
+            <button class="ab primary" style="padding:6px 12px;font-size:10px" onclick="document.getElementById('ase-file').click()">
+              <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Aggiungi Foto
+            </button>
+            <input type="file" id="ase-file" multiple accept="image/*" style="display:none" onchange="addPhotosToCurrentShooting(this)">
+          </div>
+          <div class="a-se-body">
+            <div id="ase-grid" class="a-se-grid"></div>
+            <div id="ase-empty" style="display:none;padding:24px;text-align:center;color:var(--a-text3);font-size:12px">Nessuna foto. Usa "Aggiungi Foto" per caricarle.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TESTI -->
+      <div class="a-tab" id="atab-texts">
+        <div class="a-pg-title">Gestione Testi</div>
+        <div class="a-pg-sub">Modifica ogni testo visibile nel sito. Premi "Applica" su ogni riga per salvare subito, oppure usa "SALVA TUTTO" per aggiornare tutto in una volta.</div>
+        <div style="margin-bottom:16px">
+          <button class="ab primary" style="padding:12px 28px;font-size:11px;letter-spacing:2px" onclick="saveAllTexts()">SALVA TUTTO</button>
+        </div>
+        <div id="a-texts-body"></div>
+        <div style="margin-top:16px">
+          <button class="ab primary" style="padding:12px 28px;font-size:11px;letter-spacing:2px" onclick="saveAllTexts()">SALVA TUTTO</button>
+        </div>
+      </div>
+
+      <!-- RICHIESTE BOOKING -->
+      <div class="a-tab" id="atab-bookings">
+        <div class="a-pg-title">Richieste Ricevute</div>
+        <div class="a-pg-sub">Tutte le richieste di shooting inviate dagli utenti tramite il form.</div>
+        <div style="margin-bottom:14px;display:flex;gap:8px;flex-wrap:wrap">
+          <button class="ab" onclick="exportBookingsCSV()">Esporta CSV</button>
+          <button class="ab danger" onclick="clearBookings()">
+            <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+            Svuota tutte le richieste
+          </button>
+        </div>
+        <div id="a-req-list" class="a-req"></div>
+        <div id="a-req-empty" style="display:none;padding:36px;text-align:center;color:var(--a-text3);font-size:13px">Nessuna richiesta ricevuta.</div>
+      </div>
+
+      <!-- REGISTRO ACCESSI -->
+      <div class="a-tab" id="atab-access">
+        <div class="a-pg-title">Registro Accessi</div>
+        <div class="a-pg-sub">Tutti i nomi, cognomi e email che hanno effettuato l'accesso al portfolio.</div>
+        <div style="margin-bottom:14px;display:flex;gap:8px;flex-wrap:wrap">
+          <button class="ab" onclick="exportAccessCSV()">Esporta CSV</button>
+          <button class="ab danger" onclick="clearAccess()">
+            <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+            Svuota registro
+          </button>
+        </div>
+        <div id="a-log-list" class="a-log"></div>
+        <div id="a-log-empty" style="display:none;padding:36px;text-align:center;color:var(--a-text3);font-size:13px;font-style:italic">Nessun accesso registrato.</div>
+      </div>
+
+    </div><!-- /a-content -->
+  </div><!-- /a-body -->
+</div><!-- /admin -->
+
+
+<!-- CONFIRM DIALOG -->
+<div id="confirm-overlay">
+  <div class="confirm-box">
+    <div class="confirm-msg" id="confirm-msg">Sei sicuro?</div>
+    <div class="confirm-btns">
+      <button class="confirm-cancel" id="confirm-cancel-btn">Annulla</button>
+      <button class="confirm-ok" id="confirm-ok-btn">Conferma</button>
+    </div>
+  </div>
+</div>
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- ================================================================
+     JAVASCRIPT
+     ================================================================ -->
+<script>
+// ================================================================
+// DATABASE — Firebase Firestore + localStorage (fallback)
+// ================================================================
+const DB_KEY = 'mmedia_v17';
+
+function defaultDB(){
+  return { shootings:[], access:[], bookings:[], texts:{} };
+}
+
+// Carica dal localStorage come punto di partenza immediato
+function loadLocalDB(){
+  try{
+    const raw = localStorage.getItem(DB_KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  try{
+    const old = localStorage.getItem('mmedia_v15');
+    if(old){ const p=JSON.parse(old); if(p&&p.shootings) return p; }
+  }catch(e){}
+  return defaultDB();
+}
+
+let DB = loadLocalDB();
+if(!DB.texts)     DB.texts     = {};
+if(!DB.shootings) DB.shootings = [];
+if(!DB.bookings)  DB.bookings  = [];
+if(!DB.access)    DB.access    = [];
+
+// Merge dati da Firestore nel DB locale e aggiorna UI
+window._mergeFB = function(remote){
+  if(!remote) return;
+  if(Array.isArray(remote.shootings)) DB.shootings = remote.shootings;
+  if(Array.isArray(remote.bookings))  DB.bookings  = remote.bookings;
+  if(Array.isArray(remote.access))    DB.access    = remote.access;
+  if(remote.texts && typeof remote.texts==='object') DB.texts = remote.texts;
+  // Mostra stato Firebase
+  const fbEl = document.getElementById('fb-status');
+  if(fbEl){ fbEl.textContent='● Firebase OK'; fbEl.style.color='var(--a-green)'; }
+  // Aggiorna interfaccia se già visibile
+  try{ applyAllTexts(); }catch(e){}
+  try{ renderShootGrid(); }catch(e){}
+  try{ refreshAdminData(); }catch(e){}
+};
+
+// Salva sia su Firestore sia su localStorage
+function saveDB(){
+  // 1. localStorage (sincrono, sempre disponibile)
+  try{ localStorage.setItem(DB_KEY, JSON.stringify(DB)); }catch(e){
+    showToast('localStorage pieno — alcune foto potrebbero non salvarsi','err');
+  }
+  // 2. Firestore (asincrono)
+  if(window._FB && window._fbReady){
+    const { setDoc, DOC } = window._FB;
+    setDoc(DOC, {
+      shootings: DB.shootings,
+      bookings:  DB.bookings,
+      access:    DB.access,
+      texts:     DB.texts
+    }, { merge: false })
+    .then(function(){ /* ok */ })
+    .catch(function(e){
+      showToast('Errore salvataggio Firebase: ' + e.message, 'err');
+    });
+  }
+  return true;
+}
+
+// Avvia Firebase in background dopo che la pagina è pronta
+window.addEventListener('DOMContentLoaded', function(){
+  if(window._fbBoot) window._fbBoot();
+});
+
+// ================================================================
+// TEXT SYSTEM
+// ================================================================
+const TEXT_DEFS = [
+  {title:'Hero', fields:[
+    {id:'txt-eye',       label:'Eyebrow rosso'},
+    {id:'txt-t1',        label:'Titolo riga 1'},
+    {id:'txt-t2',        label:'Titolo riga 2 (corsivo)'},
+    {id:'txt-brand',     label:'Nome brand'},
+    {id:'txt-desc',      label:'Descrizione hero', ta:true},
+  ]},
+  {title:'Portfolio Shooting', fields:[
+    {id:'txt-port-eye',   label:'Eyebrow sezione'},
+    {id:'txt-port-ghost', label:'Ghost text titolo'},
+    {id:'txt-port-sub',   label:'Sottotitolo', ta:true},
+  ]},
+  {title:'Sezione Prenota', fields:[
+    {id:'txt-book-eye', label:'Eyebrow sezione'},
+    {id:'txt-book-sub', label:'Sottotitolo'},
+    {id:'txt-book-h3',  label:'Titolo sinistra'},
+    {id:'txt-book-p',   label:'Testo sinistra', ta:true},
+  ]},
+  {title:'Contatti', fields:[
+    {id:'txt-c-eye',   label:'Eyebrow'},
+    {id:'txt-c-email', label:'Email'},
+    {id:'txt-c-ig',    label:'Instagram'},
+    {id:'txt-c-city',  label:'Città'},
+    {id:'txt-c-sub',   label:'Testo descrittivo', ta:true},
+  ]},
+  {title:'Gatekeeper', fields:[
+    {id:'gtxt-h1',  label:'Titolo pagina accesso'},
+    {id:'gtxt-sub', label:'Sottotitolo pagina accesso', ta:true},
+  ]},
+  {title:'Footer', fields:[
+    {id:'txt-ftr', label:'Testo copyright'},
+  ]},
+];
+
+function applyAllTexts(){
+  if(!DB || !DB.texts) return;
+  for(const [id, val] of Object.entries(DB.texts)){
+    const el = document.getElementById(id);
+    if(el) el.textContent = val;
+  }
+}
+
+// Tiene traccia se i testi sono già stati costruiti per non perdere modifiche
+let _textsBuilt = false;
+
+function buildTextsUI(){
+  const wrap = document.getElementById('a-texts-body');
+  wrap.innerHTML = '';
+  _textsBuilt = true;
+  TEXT_DEFS.forEach(function(sec){
+    const s = document.createElement('div');
+    s.className = 'a-txt-sec';
+    s.innerHTML = '<div class="a-txt-sec-hdr">'+sec.title+'</div><div class="a-txt-sec-body" id="tsb-'+sec.title.replace(/\s/g,'')+'"></div>';
+    wrap.appendChild(s);
+    const body = s.querySelector('.a-txt-sec-body');
+    sec.fields.forEach(function(f){
+      const el = document.getElementById(f.id);
+      const cur = DB.texts[f.id] !== undefined ? DB.texts[f.id] : (el ? el.textContent.trim() : '');
+      const inp = f.ta
+        ? '<textarea class="a-inp" id="tinp-'+f.id+'" style="min-height:58px">'+escHtml(cur)+'</textarea>'
+        : '<input class="a-inp" id="tinp-'+f.id+'" value="'+escAttr(cur)+'">';
+      const row = document.createElement('div');
+      row.className = 'a-txt-row';
+      row.innerHTML = '<div class="a-txt-lbl">'+f.label+'</div><div class="a-txt-rhs">'+inp+'<button class="ab primary" style="padding:7px 12px;font-size:10px;flex-shrink:0" data-action="apply-text" data-id="'+f.id+'">Applica</button></div>';
+      body.appendChild(row);
+    });
+  });
+}
+
+// Delegazione eventi per pulsanti "Applica" nella sezione testi
+document.addEventListener('click', function(e){
+  const btn = e.target.closest('[data-action="apply-text"]');
+  if(btn){ applyText(btn.getAttribute('data-id')); }
+});
+
+function escHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s){ return String(s||'').replace(/"/g,'&quot;'); }
+
+function applyText(id){
+  const el = document.getElementById('tinp-'+id);
+  if(!el) return;
+  DB.texts[id] = el.value;
+  saveDB();
+  applyAllTexts();
+  showToast('Testo aggiornato');
+}
+
+function saveAllTexts(){
+  TEXT_DEFS.forEach(function(sec){
+    sec.fields.forEach(function(f){
+      const el = document.getElementById('tinp-'+f.id);
+      if(el) DB.texts[f.id] = el.value;
+    });
+  });
+  saveDB();
+  applyAllTexts();
+  showToast('Tutti i testi salvati','ok');
+}
+
+// ================================================================
+// GATE
+// ================================================================
+function gTab(t){
+  ['ospite','email'].forEach(function(x){
+    document.getElementById('gtab-'+x).classList.toggle('on', x===t);
+    document.getElementById('gpanel-'+x).classList.toggle('on', x===t);
+  });
+}
+
+function gAccessOspite(){
+  const n = document.getElementById('g-nome').value.trim();
+  const c = document.getElementById('g-cognome').value.trim();
+  const err = document.getElementById('gerr-ospite');
+  if(!n||!c){ err.style.display='block'; return; }
+  err.style.display='none';
+  regAccess('guest', n+' '+c);
+  enterSite(n+' '+c);
+}
+
+function gAccessEmail(){
+  const e = document.getElementById('g-email').value.trim();
+  const err = document.getElementById('gerr-email');
+  const valid = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e);
+  if(!e||!valid){ err.style.display='block'; return; }
+  err.style.display='none';
+  regAccess('email', e);
+  enterSite(e);
+}
+
+function regAccess(type, value){
+  DB.access.unshift({type:type, value:value, ts:new Date().toISOString()});
+  saveDB();
+}
+
+function enterSite(uname){
+  document.getElementById('gate').style.display='none';
+  document.getElementById('site').style.display='block';
+  document.getElementById('hdr-uname').textContent = uname;
+  applyAllTexts();
+  renderShootGrid();
+  updateBadges();
+}
+
+function doLogout(){
+  document.getElementById('site').style.display='none';
+  document.getElementById('gate').style.display='flex';
+  document.getElementById('g-nome').value='';
+  document.getElementById('g-cognome').value='';
+  document.getElementById('g-email').value='';
+  document.getElementById('hdr-uname').textContent='';
+  // Chiudi tutto
+  document.getElementById('lightbox').classList.remove('on');
+  document.getElementById('fv').classList.remove('on');
+  document.getElementById('admin').classList.remove('on');
+}
+
+// ================================================================
+// ADMIN LOGIN
+// ================================================================
+// Hash djb2 della password. Non espone la password in chiaro.
+// djb2('21510') = 195268574
+// Per cambiare: usa il campo "Sicurezza" nel pannello admin.
+const ADMIN_PW_HASH = 195268574;
+
+function djb2(str){
+  let h = 5381;
+  for(let i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) >>> 0;
+  return h;
+}
+
+function getActiveHash(){
+  // Priorità: hash salvato via UI > hash hardcoded
+  try{
+    const s = localStorage.getItem('mmedia_pw_hash');
+    if(s){ const n = parseInt(s,10); if(!isNaN(n)) return n; }
+  }catch(e){}
+  return ADMIN_PW_HASH;
+}
+
+let _pwAttempts = 0;
+
+function openAdminLogin(){
+  _pwAttempts = 0;
+  document.getElementById('modal-btns').style.display='flex';
+  document.getElementById('m-err').style.display='none';
+  document.getElementById('mpw').value='';
+  document.getElementById('modal').classList.add('on');
+  setTimeout(function(){ document.getElementById('mpw').focus(); }, 80);
+}
+
+function closeModal(){
+  document.getElementById('modal').classList.remove('on');
+  document.getElementById('mpw').value='';
+  document.getElementById('m-err').style.display='none';
+}
+
+function checkPw(){
+  const entered = document.getElementById('mpw').value;
+  if(djb2(entered) === getActiveHash()){
+    _pwAttempts = 0;
+    closeModal();
+    openAdmin();
+  } else {
+    _pwAttempts++;
+    const errEl = document.getElementById('m-err');
+    errEl.style.display = 'block';
+    if(_pwAttempts >= 3){
+      document.getElementById('modal-btns').style.display='none';
+      errEl.textContent = 'Troppi tentativi. Ricarica la pagina.';
+    } else {
+      errEl.textContent = 'Password errata. Riprova ('+_pwAttempts+'/3).';
+    }
+    document.getElementById('mpw').value='';
+  }
+}
+
+// Consenti invio con Enter nel campo password
+document.getElementById('mpw').addEventListener('keydown', function(e){
+  if(e.key === 'Enter') checkPw();
+});
+
+function openAdmin(){
+  document.getElementById('admin').classList.add('on');
+  refreshAdminData();
+  buildTextsUI();
+}
+
+function closeAdmin(){
+  document.getElementById('admin').classList.remove('on');
+}
+
+function exitAdmin(){
+  document.getElementById('admin').classList.remove('on');
+  // Nascondi l'editor foto se era aperto
+  document.getElementById('a-shoot-editor').classList.remove('on');
+  currentEditId = null;
+}
+
+// ================================================================
+// ADMIN TABS
+// ================================================================
+function aTab(name){
+  document.querySelectorAll('.a-tab').forEach(function(t){ t.classList.remove('on'); });
+  document.querySelectorAll('.a-nav-item').forEach(function(n){ n.classList.remove('on'); });
+
+  const tab = document.getElementById('atab-'+name);
+  if(tab) tab.classList.add('on');
+
+  document.querySelectorAll('.a-nav-item').forEach(function(n){
+    const oc = n.getAttribute('onclick') || '';
+    if(oc.includes("'"+name+"'")) n.classList.add('on');
+  });
+
+  // Nascondi l'editor foto quando si cambia tab
+  if(name !== 'manage-shoot'){
+    document.getElementById('a-shoot-editor').classList.remove('on');
+    currentEditId = null;
+  }
+
+  if(name === 'manage-shoot') renderAdminShootList();
+  if(name === 'access')       renderAccessLog();
+  if(name === 'bookings')     renderBookings();
+  if(name === 'texts')        buildTextsUI();
+  if(name === 'dash')         updateDash();
+}
+
+// ================================================================
+// SHOOTING — CREATE
+// ================================================================
+let nsCoverData = null;
+
+function handleNsCover(inp){
+  const f = inp.files[0];
+  if(!f) return;
+  readFile(f, function(data){
+    nsCoverData = data;
+    document.getElementById('ns-preview-img').src = data;
+    document.getElementById('ns-preview').style.display = 'block';
+    document.getElementById('ns-cover-txt').textContent = 'Copertina selezionata';
+  });
+}
+
+function createShooting(){
+  const title = document.getElementById('ns-title').value.trim();
+  if(!title){ showToast('Inserisci un titolo per lo shooting','err'); return; }
+  const s = {
+    id:       uid(),
+    title:    title,
+    date:     document.getElementById('ns-date').value,
+    location: document.getElementById('ns-loc').value.trim(),
+    desc:     document.getElementById('ns-desc').value.trim(),
+    cover:    nsCoverData,
+    photos:   []
+  };
+  DB.shootings.unshift(s);
+  saveDB();
+  // Reset form
+  ['ns-title','ns-date','ns-loc','ns-desc'].forEach(function(id){ document.getElementById(id).value=''; });
+  nsCoverData = null;
+  document.getElementById('ns-preview').style.display = 'none';
+  document.getElementById('ns-cover-txt').textContent = 'Clicca per scegliere la copertina';
+  document.getElementById('ns-cover').value = '';
+  showToast('Shooting creato');
+  refreshAdminData();
+  aTab('manage-shoot');
+}
+
+// ================================================================
+// SHOOTING — DELETE
+// ================================================================
+function deleteShooting(id){
+  customConfirm('Eliminare questo shooting e tutte le sue foto?', function(){
+    DB.shootings = DB.shootings.filter(function(s){ return s.id !== id; });
+    saveDB();
+    if(currentEditId === id){
+      currentEditId = null;
+      document.getElementById('a-shoot-editor').classList.remove('on');
+    }
+    renderAdminShootList();
+    renderShootGrid();
+    updateDash();
+    updateBadges();
+    showToast('Shooting eliminato');
+  });
+}
+
+// ================================================================
+// SHOOTING — EDIT (modal)
+// ================================================================
+let editCoverData = null;
+
+function openEditModal(id){
+  const s = DB.shootings.find(function(x){ return x.id===id; });
+  if(!s) return;
+  document.getElementById('em-id').value    = id;
+  document.getElementById('em-title').value = s.title;
+  document.getElementById('em-date').value  = s.date || '';
+  document.getElementById('em-loc').value   = s.location || '';
+  document.getElementById('em-desc').value  = s.desc || '';
+  editCoverData = null;
+  document.getElementById('em-cover-txt').textContent = 'Clicca per cambiare la copertina';
+  document.getElementById('em-cover-inp').value = '';
+  document.getElementById('edit-modal').classList.add('on');
+}
+
+function closeEditModal(){
+  document.getElementById('edit-modal').classList.remove('on');
+  editCoverData = null;
+}
+
+function deleteFromEditModal(){
+  const id = document.getElementById('em-id').value;
+  closeEditModal();
+  deleteShooting(id);
+}
+
+function handleEditCover(inp){
+  const f = inp.files[0];
+  if(!f) return;
+  readFile(f, function(data){
+    editCoverData = data;
+    document.getElementById('em-cover-txt').textContent = 'Nuova copertina selezionata';
+  });
+}
+
+function saveShooting(){
+  const id = document.getElementById('em-id').value;
+  const s  = DB.shootings.find(function(x){ return x.id===id; });
+  if(!s){ showToast('Shooting non trovato','err'); return; }
+  const title = document.getElementById('em-title').value.trim();
+  if(!title){ showToast('Il titolo è obbligatorio','err'); return; }
+  s.title    = title;
+  s.date     = document.getElementById('em-date').value;
+  s.location = document.getElementById('em-loc').value.trim();
+  s.desc     = document.getElementById('em-desc').value.trim();
+  if(editCoverData) s.cover = editCoverData;
+  saveDB();
+  closeEditModal();
+  renderAdminShootList();
+  renderShootGrid();
+  showToast('Shooting aggiornato');
+}
+
+// ================================================================
+// SHOOTING — PHOTO EDITOR (inline)
+// ================================================================
+let currentEditId = null;
+
+function openShootEditor(id){
+  currentEditId = id;
+  const s = DB.shootings.find(function(x){ return x.id===id; });
+  if(!s) return;
+  const editor = document.getElementById('a-shoot-editor');
+  editor.classList.add('on');
+  document.getElementById('ase-title').textContent = 'Foto: '+s.title;
+  document.getElementById('ase-file').value = '';
+  renderAseGrid(s);
+  setTimeout(function(){
+    var ac = document.querySelector('.a-content');
+    if(ac) ac.scrollTop = ac.scrollTop + editor.getBoundingClientRect().top - 100;
+    else editor.scrollIntoView({behavior:'smooth',block:'start'});
+  }, 120);
+}
+
+function addPhotosToCurrentShooting(inp){
+  const s = DB.shootings.find(function(x){ return x.id===currentEditId; });
+  if(!s){ showToast('Seleziona prima uno shooting','err'); return; }
+  const files = Array.from(inp.files);
+  if(!files.length) return;
+
+  let done = 0;
+  let failed = 0;
+
+  files.forEach(function(f){
+    readFile(f, function(data){
+      if(data){
+        s.photos.push({id:uid(), data:data});
+      } else {
+        failed++;
+      }
+      done++;
+      if(done === files.length){
+        saveDB();
+        renderAseGrid(s);
+        renderAdminShootList();
+        renderShootGrid();
+        updateDash();
+        const ok = files.length - failed;
+        showToast(ok+' foto aggiunte'+(failed?' ('+failed+' fallite)':''));
+        inp.value = '';
+      }
+    });
+  });
+}
+
+function deletePhoto(shootId, photoId){
+  const s = DB.shootings.find(function(x){ return x.id===shootId; });
+  if(!s){ showToast('Shooting non trovato','err'); return; }
+  customConfirm('Eliminare questa foto?', function(){
+    s.photos = s.photos.filter(function(p){ return p.id !== photoId; });
+    saveDB();
+    renderAseGrid(s);
+    renderAdminShootList();
+    renderShootGrid();
+    updateDash();
+    showToast('Foto eliminata');
+  });
+}
+
+function renderAseGrid(s){
+  const grid  = document.getElementById('ase-grid');
+  const empty = document.getElementById('ase-empty');
+  grid.innerHTML = '';
+  if(!s.photos.length){
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  s.photos.forEach(function(p){
+    const cell = document.createElement('div');
+    cell.className = 'a-se-photo';
+    const img = document.createElement('img');
+    img.src = p.data;
+    img.alt = '';
+    const del = document.createElement('button');
+    del.className = 'a-se-del';
+    del.textContent = '×';
+    del.setAttribute('data-shoot', s.id);
+    del.setAttribute('data-photo', p.id);
+    cell.appendChild(img);
+    cell.appendChild(del);
+    grid.appendChild(cell);
+  });
+}
+
+// Event delegation — cancella foto
+document.addEventListener('click', function(e){
+  const btn = e.target.closest('.a-se-del');
+  if(btn){
+    const sId = btn.getAttribute('data-shoot');
+    const pId = btn.getAttribute('data-photo');
+    if(sId && pId) deletePhoto(sId, pId);
+  }
+});
+
+// ================================================================
+// ADMIN SHOOT LIST
+// ================================================================
+function renderAdminShootList(){
+  const list  = document.getElementById('a-shoot-list');
+  const empty = document.getElementById('a-shoot-empty');
+  list.innerHTML = '';
+  updateBadges();
+
+  if(!DB.shootings.length){
+    empty.style.display = 'block';
+    list.style.display  = 'none';
+    return;
+  }
+  empty.style.display = 'none';
+  list.style.display  = '';
+
+  DB.shootings.forEach(function(s){
+    const dstr = s.date
+      ? new Date(s.date+'T12:00:00').toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'})
+      : '—';
+
+    const item = document.createElement('div');
+    item.className = 'a-sl-item';
+
+    // Thumbnail
+    if(s.cover){
+      const thumb = document.createElement('img');
+      thumb.src = s.cover;
+      thumb.style.cssText = 'width:68px;height:48px;object-fit:cover;flex-shrink:0';
+      item.appendChild(thumb);
+    } else {
+      const ph = document.createElement('div');
+      ph.className = 'a-sl-thumb-ph';
+      ph.textContent = 'no cover';
+      item.appendChild(ph);
+    }
+
+    // Info
+    const info = document.createElement('div');
+    info.className = 'a-sl-info';
+    info.innerHTML =
+      '<div class="a-sl-name">'+escHtml(s.title)+'</div>'+
+      '<div class="a-sl-meta">'+dstr+(s.location?' · '+escHtml(s.location):'')+' · '+s.photos.length+' foto</div>';
+    item.appendChild(info);
+
+    // Buttons
+    const btns = document.createElement('div');
+    btns.className = 'a-sl-btns';
+
+    [
+      {label:'Foto',     action:'foto', cls:'ab'},
+      {label:'Modifica', action:'edit', cls:'ab warn'},
+      {label:'Elimina',  action:'del',  cls:'ab danger'},
+    ].forEach(function(def){
+      const b = document.createElement('button');
+      b.className = def.cls;
+      b.style.cssText = 'padding:6px 11px;font-size:10px';
+      b.textContent = def.label;
+      b.setAttribute('data-action', def.action);
+      b.setAttribute('data-id', s.id);
+      btns.appendChild(b);
+    });
+
+    item.appendChild(btns);
+    list.appendChild(item);
+  });
+}
+
+// Event delegation — lista shooting admin
+document.getElementById('a-shoot-list').addEventListener('click', function(e){
+  const btn = e.target.closest('[data-action]');
+  if(!btn) return;
+  const id     = btn.getAttribute('data-id');
+  const action = btn.getAttribute('data-action');
+  if(action === 'del')  deleteShooting(id);
+  else if(action === 'edit') openEditModal(id);
+  else if(action === 'foto') openShootEditor(id);
+});
+
+// ================================================================
+// PUBLIC SHOOT GRID
+// ================================================================
+function renderShootGrid(){
+  const grid = document.getElementById('shoot-grid');
+  if(!grid) return;
+  grid.innerHTML = '';
+
+  if(!DB.shootings.length){
+    grid.innerHTML = '<div class="s-empty"><b>Nessuno shooting ancora</b>Entra nell\'admin per creare il primo shooting.</div>';
+    return;
+  }
+
+  DB.shootings.forEach(function(s){
+    const dstr = s.date
+      ? new Date(s.date+'T12:00:00').toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'})
+      : '';
+
+    const card = document.createElement('div');
+    card.className = 's-card';
+    card.setAttribute('data-shoot-id', s.id);
+
+    if(s.cover){
+      const img = document.createElement('img');
+      img.src = s.cover;
+      img.alt = s.title;
+      img.loading = 'lazy';
+      card.appendChild(img);
+    } else {
+      const ph = document.createElement('div');
+      ph.className = 's-ph';
+      ph.innerHTML = '<span>No Cover</span>';
+      card.appendChild(ph);
+    }
+
+    const ov = document.createElement('div');
+    ov.className = 's-ov';
+    card.appendChild(ov);
+
+    const info = document.createElement('div');
+    info.className = 's-info';
+    info.innerHTML =
+      '<div class="s-date">'+escHtml(dstr)+'</div>'+
+      '<div class="s-name">'+escHtml(s.title)+'</div>'+
+      '<div class="s-cnt">'+s.photos.length+' foto'+(s.location?' · '+escHtml(s.location):'')+'</div>';
+    card.appendChild(info);
+
+    grid.appendChild(card);
+  });
+}
+
+// Event delegation — griglia pubblica (più sicuro di onclick inline)
+document.getElementById('shoot-grid').addEventListener('click', function(e){
+  const card = e.target.closest('[data-shoot-id]');
+  if(card) openLightbox(card.getAttribute('data-shoot-id'));
+});
+
+// ================================================================
+// LIGHTBOX
+// ================================================================
+let fvPhotos = [];
+let fvIdx    = 0;
+let _lbOpenId = null;
+
+function openLightbox(id){
+  const s = DB.shootings.find(function(x){ return x.id===id; });
+  if(!s) return;
+  _lbOpenId = id;
+
+  const lb    = document.getElementById('lightbox');
+  const dstr  = s.date
+    ? new Date(s.date+'T12:00:00').toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'})
+    : '';
+
+  document.getElementById('lb-title').textContent = s.title;
+  document.getElementById('lb-meta').textContent  = dstr+(s.location?' — '+s.location:'');
+
+  const gal   = document.getElementById('lb-gallery');
+  const empty = document.getElementById('lb-empty');
+  gal.innerHTML = '';
+
+  // Aggiorna sempre fvPhotos con le foto di questo shooting
+  fvPhotos = s.photos;
+  fvIdx    = 0;
+
+  if(!s.photos.length){
+    empty.style.display = 'block';
+    lb.classList.add('on');
+    return;
+  }
+  empty.style.display = 'none';
+
+  s.photos.forEach(function(p, i){
+    const cell = document.createElement('div');
+    cell.className = 'lb-photo';
+    const img = document.createElement('img');
+    img.src     = p.data;
+    img.alt     = 'Foto '+(i+1);
+    img.loading = 'lazy';
+    cell.appendChild(img);
+    cell.setAttribute('data-fv-idx', i);
+    gal.appendChild(cell);
+  });
+
+  lb.classList.add('on');
+  document.querySelector('.lb-body').scrollTop = 0;
+}
+
+// Event delegation — click foto in lightbox
+document.getElementById('lb-gallery').addEventListener('click', function(e){
+  const cell = e.target.closest('[data-fv-idx]');
+  if(cell) openFV(parseInt(cell.getAttribute('data-fv-idx'), 10));
+});
+
+function closeLightbox(){
+  document.getElementById('lightbox').classList.remove('on');
+  try{ document.querySelector('.lb-body').scrollTop = 0; }catch(e){}  // reset scroll
+  document.getElementById('fv').classList.remove('on');
+  _lbOpenId = null;
+  fvPhotos  = [];
+}
+
+// ================================================================
+// FULLSCREEN VIEWER
+// ================================================================
+function openFV(i){
+  if(!fvPhotos.length) return;
+  fvIdx = Math.max(0, Math.min(fvPhotos.length-1, i));
+  document.getElementById('fv').classList.add('on');
+  renderFV();
+}
+
+function renderFV(){
+  if(!fvPhotos[fvIdx]) return;
+  document.getElementById('fv-img').src = fvPhotos[fvIdx].data;
+  document.getElementById('fv-prev').style.display = fvIdx > 0 ? 'flex' : 'none';
+  document.getElementById('fv-next').style.display = fvIdx < fvPhotos.length-1 ? 'flex' : 'none';
+}
+
+function fvNav(d){
+  fvIdx = Math.max(0, Math.min(fvPhotos.length-1, fvIdx+d));
+  renderFV();
+}
+
+function closeFV(){
+  document.getElementById('fv').classList.remove('on');
+}
+
+document.addEventListener('keydown', function(e){
+  if(document.getElementById('fv').classList.contains('on')){
+    if(e.key === 'ArrowLeft')  fvNav(-1);
+    if(e.key === 'ArrowRight') fvNav(1);
+    if(e.key === 'Escape')     closeFV();
+    return;
+  }
+  if(document.getElementById('lightbox').classList.contains('on') && e.key === 'Escape'){
+    closeLightbox();
+  }
+});
+
+// ================================================================
+// BOOKING
+// ================================================================
+function submitBooking(){
+  const name  = document.getElementById('bk-name').value.trim();
+  const email = document.getElementById('bk-email').value.trim();
+  const msg   = document.getElementById('bk-msg').value.trim();
+  const car   = document.getElementById('bk-car').value.trim();
+
+  if(!name || !email || !msg){
+    showToast('Compila tutti i campi obbligatori *','err');
+    return;
+  }
+  const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+  if(!validEmail){
+    showToast('Inserisci un indirizzo email valido','err');
+    return;
+  }
+
+  // 1. Salva nel DB PRIMA di tutto
+  DB.bookings.unshift({id:uid(), name:name, email:email, car:car, msg:msg, ts:new Date().toISOString()});
+  saveDB();
+  updateBadges();
+
+  // 2. Reset form
+  ['bk-name','bk-email','bk-car','bk-msg'].forEach(function(id){
+    document.getElementById(id).value = '';
+  });
+
+  // 3. Mostra conferma
+  const okEl = document.getElementById('bk-ok');
+  okEl.style.display = 'block';
+  setTimeout(function(){ okEl.style.display='none'; }, 6000);
+  showToast('Richiesta salvata','ok');
+
+  // 4. Apri client email (NON con window.location — non interrompe il flusso)
+  const subject = encodeURIComponent('Richiesta Shooting - '+name);
+  const body    = encodeURIComponent(
+    'Nome: '+name+'\n'+
+    'Email: '+email+'\n'+
+    (car ? 'Auto/Progetto: '+car+'\n' : '')+
+    '\nMessaggio:\n'+msg
+  );
+  const mailLink = document.createElement('a');
+  mailLink.href = 'mailto:michelegiochi215@gmail.com?subject='+subject+'&body='+body;
+  mailLink.style.display = 'none';
+  document.body.appendChild(mailLink);
+  mailLink.click();
+  setTimeout(function(){ document.body.removeChild(mailLink); }, 500);
+}
+
+function renderBookings(){
+  const list  = document.getElementById('a-req-list');
+  const empty = document.getElementById('a-req-empty');
+  list.innerHTML = '';
+
+  if(!DB.bookings.length){
+    empty.style.display = 'block';
+    list.style.display  = 'none';
+    return;
+  }
+  empty.style.display = 'none';
+  list.style.display  = '';
+
+  DB.bookings.forEach(function(b, idx){
+    const ts   = new Date(b.ts);
+    const tstr = ts.toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit',year:'numeric'})+
+                 ' '+ts.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
+    const item = document.createElement('div');
+    item.className = 'a-req-item';
+    item.innerHTML =
+      '<div class="a-req-hdr">'+
+        '<div class="a-req-name">'+escHtml(b.name)+'</div>'+
+        '<div style="display:flex;gap:8px;align-items:center">'+
+          '<div class="a-req-time">'+tstr+'</div>'+
+          '<button class="ab" style="padding:4px 9px;font-size:10px" data-action="reply-booking" data-idx="'+idx+'">Rispondi</button>'+
+          '<button class="ab danger" style="padding:4px 9px;font-size:10px" data-action="del-booking" data-idx="'+idx+'">Elimina</button>'+
+        '</div>'+
+      '</div>'+
+      '<div class="a-req-meta">'+escHtml(b.email)+(b.car?' · '+escHtml(b.car):'')+'</div>'+
+      '<div class="a-req-msg">'+escHtml(b.msg)+'</div>';
+    list.appendChild(item);
+  });
+}
+
+function deleteBooking(idx){
+  idx = parseInt(idx, 10);
+  if(isNaN(idx)||idx<0||idx>=DB.bookings.length){ showToast('Richiesta non trovata','err'); return; }
+  customConfirm('Eliminare questa richiesta?', function(){
+    DB.bookings.splice(idx, 1);
+    saveDB();
+    renderBookings();
+    updateBadges();
+    showToast('Richiesta eliminata');
+  });
+}
+
+function replyBooking(idx){
+  idx = parseInt(idx, 10);
+  if(isNaN(idx)||idx<0||idx>=DB.bookings.length) return;
+  var b = DB.bookings[idx];
+
+  var subject = encodeURIComponent('Re: Richiesta Shooting — ' + b.name);
+
+  var bodyLines = [
+    'Ciao ' + b.name + ',',
+    '',
+    '',
+    '',
+    '— manfree_media',
+    '',
+    '',
+    '────────────────────────────',
+    'Messaggio originale:',
+    'Da: ' + b.name + ' <' + b.email + '>',
+    (b.car ? 'Auto/Progetto: ' + b.car : ''),
+    '',
+    b.msg,
+    '────────────────────────────'
+  ].filter(function(l){ return l !== false; });
+
+  var body = encodeURIComponent(bodyLines.join('\n'));
+
+  // Destinatario: il cliente | CC: michelegiochi215@gmail.com (così hai copia della risposta)
+  location.href =
+    'mailto:' + encodeURIComponent(b.email) +
+    '?cc=' + encodeURIComponent('michelegiochi215@gmail.com') +
+    '&subject=' + subject +
+    '&body=' + body;
+}
+
+function clearBookings(){
+  customConfirm('Eliminare tutte le richieste? Operazione irreversibile.', function(){
+    DB.bookings = [];
+    saveDB();
+    renderBookings();
+    updateBadges();
+    showToast('Richieste svuotate');
+  });
+}
+
+// Event delegation — bookings
+document.getElementById('a-req-list').addEventListener('click', function(e){
+  const rbtn = e.target.closest('[data-action="reply-booking"]');
+  if(rbtn){ replyBooking(rbtn.getAttribute('data-idx')); return; }
+  const btn = e.target.closest('[data-action="del-booking"]');
+  if(btn) deleteBooking(btn.getAttribute('data-idx'));
+});
+
+// ================================================================
+// ACCESS LOG
+// ================================================================
+function renderAccessLog(){
+  const list  = document.getElementById('a-log-list');
+  const empty = document.getElementById('a-log-empty');
+  list.innerHTML = '';
+
+  if(!DB.access.length){
+    empty.style.display = 'block';
+    list.style.display  = 'none';
+    return;
+  }
+  empty.style.display = 'none';
+  list.style.display  = '';
+
+  DB.access.forEach(function(a, idx){
+    const ts   = new Date(a.ts);
+    const tstr = ts.toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit',year:'numeric'})+
+                 ' '+ts.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
+    const item = document.createElement('div');
+    item.className = 'a-log-item';
+    item.innerHTML =
+      '<span class="a-log-badge '+(a.type||'guest')+'">'+(a.type==='email'?'Email':'Ospite')+'</span>'+
+      '<span class="a-log-val">'+escHtml(a.value)+'</span>'+
+      '<span class="a-log-time">'+tstr+'</span>'+
+      '<button class="ab danger" style="padding:3px 10px;font-size:11px;margin-left:auto;flex-shrink:0" data-action="del-access" data-idx="'+idx+'">Elimina</button>';
+    list.appendChild(item);
+  });
+}
+
+function deleteAccessEntry(idx){
+  idx = parseInt(idx, 10);
+  if(isNaN(idx)||idx<0||idx>=DB.access.length){ showToast('Voce non trovata','err'); return; }
+  customConfirm('Eliminare questa voce?', function(){
+    DB.access.splice(idx, 1);
+    saveDB();
+    renderAccessLog();
+    updateBadges();
+    showToast('Voce eliminata');
+  });
+}
+
+function clearAccess(){
+  customConfirm('Svuotare tutto il registro accessi?', function(){
+    DB.access = [];
+    saveDB();
+    renderAccessLog();
+    updateBadges();
+    showToast('Registro svuotato');
+  });
+}
+
+// Event delegation — access log
+document.getElementById('a-log-list').addEventListener('click', function(e){
+  const btn = e.target.closest('[data-action="del-access"]');
+  if(btn) deleteAccessEntry(btn.getAttribute('data-idx'));
+});
+
+// ================================================================
+// DASHBOARD & BADGES
+// ================================================================
+function updateDash(){
+  const totalPhotos = DB.shootings.reduce(function(a,s){ return a+s.photos.length; }, 0);
+  document.getElementById('kpi-shoots').textContent = DB.shootings.length;
+  document.getElementById('kpi-photos').textContent = totalPhotos;
+  document.getElementById('kpi-book').textContent   = DB.bookings.length;
+  document.getElementById('kpi-access').textContent = DB.access.length;
+}
+
+function updateBadges(){
+  document.getElementById('bdg-shoots').textContent = DB.shootings.length;
+  document.getElementById('bdg-book').textContent   = DB.bookings.length;
+  document.getElementById('bdg-access').textContent = DB.access.length;
+}
+
+function refreshAdminData(){
+  updateDash();
+  updateBadges();
+  renderAdminShootList();
+}
+
+
+// ================================================================
+// CONFIRM DIALOG CUSTOM (sostituisce window.confirm bloccato negli iframe)
+// ================================================================
+function customConfirm(msg, onOk){
+  const ov  = document.getElementById('confirm-overlay');
+  const txt = document.getElementById('confirm-msg');
+  const ok  = document.getElementById('confirm-ok-btn');
+  const can = document.getElementById('confirm-cancel-btn');
+  txt.textContent = msg;
+  ov.classList.add('on');
+  function close(){ ov.classList.remove('on'); ok.onclick=null; can.onclick=null; }
+  ok.onclick  = function(){ close(); onOk(); };
+  can.onclick = function(){ close(); };
+}
+
+// ================================================================
+// UTILS
+// ================================================================
+function uid(){
+  return Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+}
+
+function readFile(file, cb){
+  const r = new FileReader();
+  r.onload  = function(e){ cb(e.target.result); };
+  r.onerror = function(){ cb(null); };
+  r.readAsDataURL(file);
+}
+
+let _toastTimer;
+function showToast(msg, type){
+  type = type || '';
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className   = 'show'+(type ? ' '+type : '');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(function(){ t.className=''; }, 3000);
+}
+
+function gotoShoot(){
+  const el = document.getElementById('shootings');
+  if(el) el.scrollIntoView({behavior:'smooth'});
+}
+function gotoBook(){
+  const el = document.getElementById('book');
+  if(el) el.scrollIntoView({behavior:'smooth'});
+}
+
+// ================================================================
+// EXPORT / IMPORT
+// ================================================================
+function exportDB(){
+  const date = new Date().toISOString().slice(0,10);
+  const blob = new Blob([JSON.stringify(DB, null, 2)], {type:'application/json'});
+  const a    = document.createElement('a');
+  a.href     = URL.createObjectURL(blob);
+  a.download = 'manfree_media_backup_'+date+'.json';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(a.href); }, 500);
+  showToast('Backup esportato','ok');
+}
+
+function importDB(inp){
+  const f = inp.files[0];
+  if(!f) return;
+  const r = new FileReader();
+  r.onload = function(e){
+    try{
+      const parsed = JSON.parse(e.target.result);
+      if(!Array.isArray(parsed.shootings) || !Array.isArray(parsed.bookings) || !Array.isArray(parsed.access)){
+        showToast('File non valido — struttura non riconosciuta','err');
+        inp.value = '';
+        return;
+      }
+      // confirm nativo OK qui — viene chiamato da input file fuori iframe
+      if(!window.confirm('Importare il backup? I dati attuali verranno sostituiti.')){ inp.value=''; return; }
+      DB = parsed;
+      if(!DB.texts) DB.texts = {};
+      saveDB();
+      applyAllTexts();
+      renderShootGrid();
+      refreshAdminData();
+      buildTextsUI();
+      showToast('Backup importato','ok');
+    }catch(err){
+      showToast('Errore durante la lettura del file','err');
+    }
+    inp.value = '';
+  };
+  r.onerror = function(){ showToast('Impossibile leggere il file','err'); inp.value=''; };
+  r.readAsText(f);
+}
+
+function csvEscape(v){ return '"'+String(v||'').replace(/"/g,'""')+'"'; }
+
+function exportBookingsCSV(){
+  if(!DB.bookings.length){ showToast('Nessuna richiesta da esportare','err'); return; }
+  const rows = [['Data','Nome','Email','Auto/Progetto','Messaggio']];
+  DB.bookings.forEach(function(b){
+    rows.push([new Date(b.ts).toLocaleString('it-IT'), b.name, b.email, b.car||'', b.msg]);
+  });
+  const csv  = rows.map(function(r){ return r.map(csvEscape).join(','); }).join('\r\n');
+  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8'});
+  const a    = document.createElement('a');
+  a.href     = URL.createObjectURL(blob);
+  a.download = 'richieste_'+new Date().toISOString().slice(0,10)+'.csv';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(a.href); }, 500);
+  showToast('CSV esportato','ok');
+}
+
+function exportAccessCSV(){
+  if(!DB.access.length){ showToast('Nessun accesso da esportare','err'); return; }
+  const rows = [['Data','Tipo','Valore']];
+  DB.access.forEach(function(a){
+    rows.push([new Date(a.ts).toLocaleString('it-IT'), a.type==='email'?'Email':'Ospite', a.value]);
+  });
+  const csv  = rows.map(function(r){ return r.map(csvEscape).join(','); }).join('\r\n');
+  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8'});
+  const a    = document.createElement('a');
+  a.href     = URL.createObjectURL(blob);
+  a.download = 'accessi_'+new Date().toISOString().slice(0,10)+'.csv';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(a.href); }, 500);
+  showToast('CSV esportato','ok');
+}
+
+// ================================================================
+// CAMBIO PASSWORD
+// ================================================================
+function changeAdminPw(){
+  const p1  = document.getElementById('new-pw').value;
+  const p2  = document.getElementById('new-pw2').value;
+  const msg = document.getElementById('pw-msg');
+  msg.style.display = 'block';
+
+  if(!p1 || p1.length < 4){
+    msg.style.color   = 'var(--a-red)';
+    msg.textContent   = 'La password deve essere di almeno 4 caratteri.';
+    return;
+  }
+  if(p1 !== p2){
+    msg.style.color = 'var(--a-red)';
+    msg.textContent = 'Le password non coincidono.';
+    return;
+  }
+  const h = djb2(p1);
+  try{ localStorage.setItem('mmedia_pw_hash', String(h)); }catch(e){}
+  document.getElementById('new-pw').value  = '';
+  document.getElementById('new-pw2').value = '';
+  msg.style.color = 'var(--a-green)';
+  msg.textContent = 'Password aggiornata. Attiva da subito.';
+  showToast('Password aggiornata','ok');
+}
+
+// ================================================================
+// INIT
+// ================================================================
+applyAllTexts();
+updateBadges();
+</script>
+</body>
+</html>
